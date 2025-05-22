@@ -266,6 +266,87 @@
                 alert('Error: ' + error.message);
             });
         });
+        <script>
+            
+// Código mejorado para registro de medicamentos
+document.getElementById('medicationForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+    
+    try {
+        const patientId = document.getElementById('patientId').value;
+        if (!patientId || !patientId.trim()) {
+            throw new Error('No se ha identificado correctamente al paciente');
+        }
+
+        // Validación de campos numéricos
+        const quantity = parseInt(document.getElementById('quantity').value);
+        const daysSupply = parseInt(document.getElementById('daysSupply').value);
+        
+        if (isNaN(quantity) throw new Error('Cantidad debe ser un número');
+        if (isNaN(daysSupply)) throw new Error('Días de tratamiento debe ser un número');
+
+        // Estructura FHIR completa
+        const medicationData = {
+            resourceType: "MedicationDispense",
+            status: "completed",
+            medicationCodeableConcept: {
+                text: document.getElementById('medicationName').value
+            },
+            subject: {
+                reference: `Patient/${patientId}`
+            },
+            quantity: {
+                value: quantity,
+                unit: "unidades"
+            },
+            daysSupply: {
+                value: daysSupply,
+                unit: "días"
+            },
+            whenHandedOver: new Date().toISOString(),
+            dosageInstruction: [{
+                text: document.getElementById('dosage').value
+            }],
+            performer: [{
+                actor: {
+                    display: document.getElementById('prescribedBy').value
+                }
+            }]
+        };
+
+        // Agregar notas si existen
+        const notes = document.getElementById('notes').value;
+        if (notes) {
+            medicationData.note = [{ text: notes }];
+        }
+
+        console.log("Datos a enviar:", medicationData); // Para depuración
+
+        const response = await fetch(`https://hl7-fhir-ehr-vane.onrender.com/patient/${patientId}/medications`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(medicationData)
+        });
+
+        const data = await response.json();
+        
+        if (!response.ok) {
+            console.error("Error del servidor:", data);
+            throw new Error(data.message || `Error ${response.status}`);
+        }
+
+        alert("Medicamento registrado exitosamente!");
+        document.getElementById('medicationForm').reset();
+        
+    } catch (error) {
+        console.error("Error completo:", error);
+        alert(`Error al registrar: ${error.message}`);
+    }
+});
+</script>
     </script>
 </body>
 </html>
