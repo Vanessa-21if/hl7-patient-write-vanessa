@@ -6,14 +6,14 @@ const response = await fetch(`${API_BASE_URL}/patient`, {
   },
   body: JSON.stringify(patientData)
 });
-let currentpatientsId = null; // Almacena el ID del paciente registrado
+let currentpatientId = null; // Almacena el ID del paciente registrado
 // ========== REGISTRO BÁSICO DE PACIENTE ========== //
-document.getElementById("patientsForm").addEventListener("submit", async (e) => {
+document.getElementById("patientForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // 1. Obtener solo datos esenciales del paciente
-  const patientsData = {
-    resourceType: "patients",
+  const patientData = {
+    resourceType: "patient",
     name: [
       {
         given: [document.getElementById("name").value],
@@ -29,13 +29,13 @@ document.getElementById("patientsForm").addEventListener("submit", async (e) => 
   };
 
   try {
-    // 2. Enviar a la API (POST /patients)
-    const response = await fetch(`${API_BASE_URL}/patientss`, {
+    // 2. Enviar a la API (POST /patient)
+    const response = await fetch(`${API_BASE_URL}/patients`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(patientsData),
+      body: JSON.stringify(patientData),
     });
 
     const data = await response.json();
@@ -43,8 +43,8 @@ document.getElementById("patientsForm").addEventListener("submit", async (e) => 
     if (!response.ok) throw new Error(data.message || "Error al registrar paciente");
 
     // 3. Guardar ID del paciente y mostrar sección de medicamentos
-    currentpatientsId = data._id;
-    document.getElementById("patientsId").value = currentpatientsId;
+    currentpatientId = data._id;
+    document.getElementById("patientId").value = currentpatientId;
     document.getElementById("medicationSection").style.display = "block";
 
     alert(`✅ Paciente registrado (ID: ${currentpatientId})`);
