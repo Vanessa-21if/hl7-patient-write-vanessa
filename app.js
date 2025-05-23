@@ -1,12 +1,11 @@
-
 const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com"; // URL de Render
 let currentPatientId = null; // Almacena el ID del paciente registrado
 
-// ========== REGISTRO DE PACIENTE ========== //
+// ========== REGISTRO BÁSICO DE PACIENTE ========== //
 document.getElementById("patientForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // 1. Obtener datos del formulario
+  // 1. Obtener solo datos esenciales del paciente
   const patientData = {
     resourceType: "Patient",
     name: [
@@ -15,29 +14,10 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
         family: document.getElementById("familyName").value,
       },
     ],
-    gender: document.getElementById("gender").value,
-    birthDate: document.getElementById("birthDate").value,
     identifier: [
       {
         system: document.getElementById("identifierSystem").value,
         value: document.getElementById("identifierValue").value,
-      },
-    ],
-    telecom: [
-      {
-        system: "phone",
-        value: document.getElementById("cellPhone").value,
-      },
-      {
-        system: "email",
-        value: document.getElementById("email").value,
-      },
-    ],
-    address: [
-      {
-        city: document.getElementById("city").value,
-        postalCode: document.getElementById("postalCode").value,
-        line: [document.getElementById("address").value],
       },
     ],
   };
@@ -81,12 +61,12 @@ document.getElementById("medicationForm").addEventListener("submit", async (e) =
   const quantity = parseInt(document.getElementById("quantity").value);
   const daysSupply = parseInt(document.getElementById("daysSupply").value);
 
-  if (isNaN(quantity) {
-    alert("La cantidad debe ser un número");
+  if (isNaN(quantity) || isNaN(daysSupply)) {
+    alert("La cantidad y días de suministro deben ser números");
     return;
   }
 
-  // 2. Crear objeto FHIR MedicationDispense
+  // 2. Crear objeto FHIR MedicationDispense con datos esenciales
   const medicationData = {
     resourceType: "MedicationDispense",
     status: "completed",
@@ -109,21 +89,10 @@ document.getElementById("medicationForm").addEventListener("submit", async (e) =
         text: document.getElementById("dosage").value,
       },
     ],
-    performer: [
-      {
-        actor: {
-          display: document.getElementById("prescribedBy").value,
-        },
-      },
-    ],
   };
 
-  // 3. Añadir notas si existen
-  const notes = document.getElementById("notes").value;
-  if (notes) medicationData.note = [{ text: notes }];
-
   try {
-    // 4. Enviar a la API (POST /patient/{id}/medications)
+    // 3. Enviar a la API (POST /patient/{id}/medications)
     const response = await fetch(`${API_BASE_URL}/patient/${currentPatientId}/medications`, {
       method: "POST",
       headers: {
@@ -136,7 +105,7 @@ document.getElementById("medicationForm").addEventListener("submit", async (e) =
 
     if (!response.ok) throw new Error(result.message || "Error al guardar medicamento");
 
-    alert("✅ Medicamento registrado en MongoDB!");
+    alert("✅ Medicamento registrado correctamente");
     document.getElementById("medicationForm").reset();
   } catch (error) {
     console.error("Error:", error);
