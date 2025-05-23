@@ -12,21 +12,15 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // 1. Obtener solo datos esenciales del paciente
-  const patientData = {
-    resourceType: "patient",
-    name: [
-      {
-        given: [document.getElementById("name").value],
-        family: document.getElementById("familyName").value,
-      },
-    ],
-    identifier: [
-      {
-        system: document.getElementById("identifierSystem").value,
-        value: document.getElementById("identifierValue").value,
-      },
-    ],
-  };
+const patientData = {
+  name: {
+    given: document.getElementById("name").value,
+    family: document.getElementById("familyName").value
+  },
+  identifier: {
+    system: document.getElementById("identifierSystem").value,
+    value: document.getElementById("identifierValue").value
+  }
 
   try {
     // 2. Enviar a la API (POST /patient)
