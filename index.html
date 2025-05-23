@@ -62,26 +62,12 @@
     <h1>Sistema de Salud - Dispensación FHIR</h1>
     
     <div class="form-section">
-        <h2>Datos Básicos del Paciente</h2>
+        <h2>Dato extraído de la HCE del Paciente</h2>
         <form id="patientForm">
-            <label for="name" class="required">Nombre:</label>
-            <input type="text" id="name" name="name" required>
-
-            <label for="familyName" class="required">Apellido:</label>
-            <input type="text" id="familyName" name="familyName" required>
-
-            <label for="identifierSystem" class="required">Tipo de documento:</label>
-            <select id="identifierSystem" name="identifierSystem" required>
-                <option value="">Seleccione...</option>
-                <option value="http://cedula">Cédula de ciudadanía</option>
-                <option value="http://pasaporte">Pasaporte</option>
-                <option value="http://tarjeta-identidad">Tarjeta de identidad</option>
-            </select>
-
-            <label for="identifierValue" class="required">Número de documento:</label>
-            <input type="text" id="identifierValue" name="identifierValue" required>
-
-            <button type="submit">Registrar Paciente</button>
+            
+            <label for="identifierValue" class="required">ID del paciente:</label>
+            <input type="text" id="identifierValue" name="identifierValue" required> 
+            
         </form>
     </div>
 
@@ -114,15 +100,10 @@
         document.getElementById("patientForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            // 1. Obtener solo datos esenciales del paciente
+            // 1. Obtener solo ID del paciente
             const patientData = {
-                resourceType: "Patient",
-                name: [
-                    {
-                        given: [document.getElementById("name").value],
-                        family: document.getElementById("familyName").value,
-                    },
-                ],
+                resourceType: "PatientId",
+                
                 identifier: [
                     {
                         system: document.getElementById("identifierSystem").value,
@@ -133,17 +114,13 @@
 
             try {
                 // 2. Enviar a la API (POST /patient)
-                const response = await fetch(`${API_BASE_URL}/patients`, {
+                const response = await fetch(`${API_BASE_URL}/medications`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify(patientData),
                 });
-
-                const data = await response.json();
-
-                if (!response.ok) throw new Error(data.message || "Error al registrar paciente");
 
                 // 3. Guardar ID del paciente y mostrar sección de medicamentos
                 currentPatientId = data._id;
@@ -183,7 +160,7 @@
                     text: document.getElementById("medicationName").value,
                 },
                 subject: {
-                    reference: `Patient/${currentPatientId}`,
+                    reference: `PatientId/${currentPatientId}`,
                 },
                 quantity: {
                     value: quantity,
@@ -202,7 +179,7 @@
 
             try {
                 // 3. Enviar a la API (POST /patient/{id}/medications)
-                const response = await fetch(`${API_BASE_URL}/patient/${currentPatientId}/medications`, {
+                const response = await fetch(`${API_BASE_URL}/medications/${currentPatientId}/medications`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
