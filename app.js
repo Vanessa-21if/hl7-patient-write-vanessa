@@ -30,7 +30,7 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
 
   try {
     // 2. Enviar a la API (POST /patient)
-    const response = await fetch(`${API_BASE_URL}/patients`, {
+    const response = await fetch(`${API_BASE_URL}/patient`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
