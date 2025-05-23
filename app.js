@@ -1,6 +1,12 @@
-const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com"; // URL de Render
+const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com";
+const response = await fetch(`${API_BASE_URL}/patient`, {  
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(patientData)
+});
 let currentpatientsId = null; // Almacena el ID del paciente registrado
-
 // ========== REGISTRO BÁSICO DE PACIENTE ========== //
 document.getElementById("patientsForm").addEventListener("submit", async (e) => {
   e.preventDefault();
