@@ -3,28 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Salud - Dispensación de Medicamentos</title>
+    <title>Formulario de Dispensación de Medicamentos FHIR</title>
     <style>
         body {
             font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #0f0bf3;
+            color: #2c3e50;
             text-align: center;
         }
         .form-section {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
             margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+        }
+        h2 {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 5px;
         }
         label {
             display: block;
-            margin-top: 15px;
+            margin-top: 10px;
             font-weight: bold;
         }
         input, select, textarea {
@@ -36,61 +49,79 @@
             box-sizing: border-box;
         }
         button {
-            background-color: #39f30b;
-            color: hwb(322 2% 91%);
-            padding: 10px 15px;
+            background: #0bf33d;
+            color: #fff;
             border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
             border-radius: 4px;
             cursor: pointer;
-            margin-top: 20px;
             font-size: 16px;
+            width: 100%;
         }
         button:hover {
-            background-color: #c451fafa;
-        }
-        #medicationSection {
-            display: none;
-            margin-top: 30px;
-        }
-        .required:after {
-            content: " *";
-            color: red;
+            background: #12c355;
         }
     </style>
 </head>
 <body>
-    <h1>Sistema de Salud - Dispensación FHIR</h1>
-    
-    <div class="form-section">
-        <h2>Dato extraído de la HCE del Paciente</h2>
+    <div class="container">
+        <h1>Formulario de Solicitud de Medicamento HL7 FHIR</h1>
         <form id="patientForm">
-            
-            <label for="identifierValue" class="required">ID del paciente:</label>
-            <input type="text" id="identifierValue" name="identifierValue" required> 
-            
+            <!-- Sección de Información del Paciente -->
+            <div class="form-section">
+                <h2>Información del Paciente</h2>
+
+                <label for="identifierValue">Número de documento:</label>
+                <input type="text" id="identifierValue" required>
+
+
+            <!-- Sección de Información del Medicamento -->
+            <div class="form-section">
+                <h2>Información del Medicamento</h2>
+
+                <label for="nameMedicine">Nombre del Medicamento:</label>
+                <input type="text" id="nameMedicine" required>
+
+                <label for="presentation">Presentación:</label>
+                <input type="text" id="presentation" required placeholder="Ej: Tabletas 500mg">
+
+                <label for="dose">Dosis:</label>
+                <input type="text" id="dose" required placeholder="Ej: 1 tableta cada 8 horas">
+
+                <label for="amount">Cantidad:</label>
+                <input type="number" id="amount" required>
+
+                <label for="disgnosis">Diagnóstico/Motivo:</label>
+                <input type="text" id="disgnosis" required>
+                
+            </div>
+
+            <!-- Sección de Datos de Prescripción -->
+            <div class="form-section">
+                <h2>Datos de la Prescripción Médica</h2>
+
+                <label for="recipeDate">Fecha de la Receta:</label>
+                <input type="date" id="recipeDate" required>
+
+                <label for="institution">Institución de Salud:</label>
+                <input type="text" id="institution" required>
+            </div>
+
+            <!-- Sección de Observaciones -->
+            <div class="form-section">
+                <h2>Observaciones Adicionales</h2>
+
+                <label for="observations">Observaciones:</label>
+                <textarea id="observations" rows="4"></textarea>
+            </div>
+
+            <button type="submit">Registrar Dispensación</button>
         </form>
     </div>
 
-    <div id="medicationSection" class="form-section">
-        <h2>Dispensación de Medicamento</h2>
-        <form id="medicationForm">
-            <input type="hidden" id="patientId">
-            
-            <label for="medicationName" class="required">Nombre del medicamento:</label>
-            <input type="text" id="medicationName" name="medicationName" required>
-
-            <label for="quantity" class="required">Cantidad (unidades):</label>
-            <input type="number" id="quantity" name="quantity" min="1" required>
-
-            <label for="daysSupply" class="required">Días de tratamiento:</label>
-            <input type="number" id="daysSupply" name="daysSupply" min="1" required>
-
-            <label for="dosage" class="required">Instrucciones de dosificación:</label>
-            <textarea id="dosage" name="dosage" rows="3" required></textarea>
-
-            <button type="submit">Registrar Medicamento</button>
-        </form>
-    </div>
+</body>
+</html>
 
     <script>
         const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com";
