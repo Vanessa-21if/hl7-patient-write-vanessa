@@ -1,144 +1,112 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Formulario de Dispensación de Medicamentos FHIR</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        .form-section {
-            margin-bottom: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 5px;
-        }
-        h2 {
-            color: #2c3e50;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
-        label {
-            display: block;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-        input, select, textarea {
-            width: 100%;
-            padding: 8px;
-            margin-top: 5px;
-            border: 1px solid #f50ece;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        button {
-            background: #0bf33d;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            margin-top: 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            width: 100%;
-        }
-        button:hover {
-            background: #12c355;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Formulario de Dispensación de Medicamentos FHIR</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #2c3e50;
+      text-align: center;
+    }
+    .form-section {
+      margin-bottom: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 5px;
+    }
+    h2 {
+      color: #2c3e50;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 5px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 8px;
+      margin-top: 5px;
+      border: 1px solid #f50ece;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    button {
+      background: #0bf33d;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin-top: 20px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 100%;
+    }
+    button:hover {
+      background: #12c355;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Dispensación de medicamentos FHIR</h1>
-        <form id="patientForm">
-            <div class="form-section">
-                <h2>Información del Paciente</h2>
-                <label for="identifierSystem">Sistema de Identificación:</label>
-                <input type="text" id="identifierSystem" required placeholder="Ej: http://hospital.org/pacientes">
-                <label for="identifierValue">Número de documento:</label>
-                <input type="text" id="identifierValue" required>
-            </div>
+  <div class="container">
+    <h1>Dispensación de medicamentos FHIR</h1>
+    <form id="patientForm">
+      <div class="form-section">
+        <h2>Información del Paciente</h2>
+        <label for="identifierValue">Número de documento:</label>
+        <input type="text" id="identifierValue" required placeholder="Ej: 123456789" />
+      </div>
 
-            <div class="form-section" id="medicationSection" style="display:none">
-                <h2>Información del Medicamento</h2>
-                <label for="medicationName">Nombre del Medicamento:</label>
-                <input type="text" id="medicationName" required>
+      <div class="form-section">
+        <h2>Información del Medicamento</h2>
 
-                <label for="dosage">Dosis:</label>
-                <input type="text" id="dosage" required>
+        <label for="nameMedicine">Nombre del Medicamento:</label>
+        <input type="text" id="nameMedicine" required />
 
-                <label for="quantity">Cantidad:</label>
-                <input type="number" id="quantity" required>
+        <label for="presentation">Presentación:</label>
+        <input type="text" id="presentation" required />
 
-                <label for="daysSupply">Días de suministro:</label>
-                <input type="number" id="daysSupply" required>
-            </div>
+        <label for="dose">Dosis:</label>
+        <input type="text" id="dose" required />
 
-            <input type="hidden" id="patientId">
-            <button type="submit">Registrar Dispensación</button>
-        </form>
-    </div>
+        <label for="amount">Cantidad:</label>
+        <input type="number" id="amount" required />
 
-    <script>
-        const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com";
-        let currentPatientId = null;
+        <label for="disgnosis">Diagnóstico:</label>
+        <input type="text" id="disgnosis" required />
 
-        document.getElementById("patientForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
+        <label for="recipeDate">Fecha de Receta:</label>
+        <input type="date" id="recipeDate" required />
 
-            const patientData = {
-                resourceType: "PatientId",
-                identifier: [
-                    {
-                        system: document.getElementById("identifierSystem").value,
-                        value: document.getElementById("identifierValue").value,
-                    },
-                ],
-            };
+        <label for="institution">Institución:</label>
+        <input type="text" id="institution" required />
 
-            try {
-                const response = await fetch(`${API_BASE_URL}/medications`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(patientData),
-                });
+        <label for="observations">Observaciones:</label>
+        <textarea id="observations" rows="3"></textarea>
+      </div>
 
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message || "Error en registro de paciente");
+      <button type="submit">Registrar Dispensación</button>
+    </form>
+  </div>
 
-                currentPatientId = data._id || "TEST_ID";
-                document.getElementById("patientId").value = currentPatientId;
-                document.getElementById("medicationSection").style.display = "block";
-
-                alert(`✅ Paciente registrado (ID: ${currentPatientId})`);
-            } catch (error) {
-                console.error("Error:", error);
-                alert(`❌ Error: ${error.message}`);
-            }
-        });
-
-        document.getElementById("patientForm").addEventListener("submit", async (e) => {
-            
-        });
-    <script src="app.js"></script>
+  <script src="app.js"></script>
+    
 </body>
 </html>
