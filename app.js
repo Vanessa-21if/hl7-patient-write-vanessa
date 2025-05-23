@@ -83,5 +83,6 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
     const result = await response.json();
 
     if (!response.ok) throw new Error(result.message || "Error al registrar la dispensación");
-
-    alert("✅ Dispensación registrada correctamente."
+    alert("✅ Dispensación registrada correctamente.");
+  } catch (error) {
+    alert(" Error.");
