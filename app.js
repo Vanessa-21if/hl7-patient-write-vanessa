@@ -1,6 +1,7 @@
 const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com";
 
-document.getElementById("patientForm").addEventListener("submit", async (e) => {e.preventDefault();
+document.getElementById("patientForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
 
   const identifierValue = document.getElementById("identifierValue").value;
   const nameMedicine = document.getElementById("nameMedicine").value;
@@ -83,6 +84,9 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
     const result = await response.json();
 
     if (!response.ok) throw new Error(result.message || "Error al registrar la dispensación");
+
     alert("✅ Dispensación registrada correctamente.");
   } catch (error) {
-    alert(" Error.");
+    alert("❌ Error: " + error.message);
+  }
+});
