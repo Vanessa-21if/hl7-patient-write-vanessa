@@ -1,13 +1,13 @@
 const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com"; // URL de Render
-let currentPatientId = null; // Almacena el ID del paciente registrado
+let currentpatientssId = null; // Almacena el ID del paciente registrado
 
 // ========== REGISTRO BÁSICO DE PACIENTE ========== //
-document.getElementById("patientForm").addEventListener("submit", async (e) => {
+document.getElementById("patientssForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // 1. Obtener solo datos esenciales del paciente
-  const patientData = {
-    resourceType: "Patient",
+  const patientssData = {
+    resourceType: "patientss",
     name: [
       {
         given: [document.getElementById("name").value],
@@ -23,13 +23,13 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
   };
 
   try {
-    // 2. Enviar a la API (POST /patient)
-    const response = await fetch(`${API_BASE_URL}/patients`, {
+    // 2. Enviar a la API (POST /patientss)
+    const response = await fetch(`${API_BASE_URL}/patientsss`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(patientData),
+      body: JSON.stringify(patientssData),
     });
 
     const data = await response.json();
@@ -37,11 +37,11 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
     if (!response.ok) throw new Error(data.message || "Error al registrar paciente");
 
     // 3. Guardar ID del paciente y mostrar sección de medicamentos
-    currentPatientId = data._id;
-    document.getElementById("patientId").value = currentPatientId;
+    currentpatientssId = data._id;
+    document.getElementById("patientssId").value = currentpatientssId;
     document.getElementById("medicationSection").style.display = "block";
 
-    alert(`✅ Paciente registrado (ID: ${currentPatientId})`);
+    alert(`✅ Paciente registrado (ID: ${currentpatientsId})`);
   } catch (error) {
     console.error("Error:", error);
     alert(`❌ Error: ${error.message}`);
@@ -52,7 +52,7 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
 document.getElementById("medicationForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  if (!currentPatientId) {
+  if (!currentpatientsId) {
     alert("⚠️ Primero registra un paciente");
     return;
   }
@@ -74,7 +74,7 @@ document.getElementById("medicationForm").addEventListener("submit", async (e) =
       text: document.getElementById("medicationName").value,
     },
     subject: {
-      reference: `Patient/${currentPatientId}`,
+      reference: `patients/${currentpatientsId}`,
     },
     quantity: {
       value: quantity,
@@ -92,8 +92,8 @@ document.getElementById("medicationForm").addEventListener("submit", async (e) =
   };
 
   try {
-    // 3. Enviar a la API (POST /patient/{id}/medications)
-    const response = await fetch(`${API_BASE_URL}/patient/${currentPatientId}/medications`, {
+    // 3. Enviar a la API (POST /patients/{id}/medications)
+    const response = await fetch(`${API_BASE_URL}/patients/${currentpatientsId}/medications`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
