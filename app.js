@@ -1,110 +1,98 @@
 const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com";
-const response = await fetch(`${API_BASE_URL}/patient`, {  
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(patientData)
-});
-let currentpatientId = null; // Almacena el ID del paciente registrado
-// ========== REGISTRO DE ID DEL PACIENTE ========== //
+let currentPatientId = null; // Almacena el ID del paciente registrado
+
 document.getElementById("patientForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  // 1. Obtener solo datos esenciales del paciente
-const patientData = {
- 
-  identifier: {
-    system: document.getElementById("identifierSystem").value,
-    value: document.getElementById("identifierValue").value
-  },
-  try {
-    // 2. Enviar a la API (POST /patient)
-    const response = await fetch(`${API_BASE_URL}/patient`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+  if (!currentPatientId) {
+    // REGISTRO DEL PACIENTE
+    const patientData = {
+      resourceType: "Patient",
+      identifier: [
+        {
+          system: document.getElementById("identifierSystem").value,
+          value: document.getElementById("identifierValue").value,
+        },
+      ],
+    };
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/patient`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(patientData),
+      });
+
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Error al registrar paciente");
+
+      currentPatientId = data._id;
+      document.getElementById("patientId").value = currentPatientId;
+      document.getElementById("medicationSection").style.display = "block";
+
+      alert(`✅ Paciente registrado (ID: ${currentPatientId})`);
+    } catch (error) {
+      console.error("Error:", error);
+      alert(`❌ Error al registrar paciente: ${error.message}`);
+      return;
+    }
+  } else {
+    // REGISTRO DEL MEDICAMENTO
+    const quantity = parseInt(document.getElementById("quantity").value);
+    const daysSupply = parseInt(document.getElementById("daysSupply").value);
+
+    if (isNaN(quantity) || isNaN(daysSupply)) {
+      alert("⚠️ La cantidad y días de suministro deben ser números");
+      return;
+    }
+
+    const medicationData = {
+      resourceType: "MedicationDispense",
+      status: "completed",
+      medicationCodeableConcept: {
+        text: document.getElementById("medicationName").value,
       },
-      body: JSON.stringify(patientData),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) throw new Error(data.message || "Error al registrar paciente");
-
-    // 3. Guardar ID del paciente y mostrar sección de medicamentos
-    currentpatientId = data._id;
-    document.getElementById("patientId").value = currentpatientId;
-    document.getElementById("medicationSection").style.display = "block";
-
-    alert(`✅ Paciente registrado (ID: ${currentpatientId})`);
-  } catch (error) {
-    console.error("Error:", error);
-    alert(`❌ Error: ${error.message}`);
-  }
-});
-
-// ========== REGISTRO DE MEDICAMENTO ========== //
-document.getElementById("medicationForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-
-  if (!currentpatientId) {
-    alert("⚠️ Primero registra un paciente");
-    return;
-  }
-
-  // 1. Validar campos numéricos
-  const quantity = parseInt(document.getElementById("quantity").value);
-  const daysSupply = parseInt(document.getElementById("daysSupply").value);
-
-  if (isNaN(quantity) || isNaN(daysSupply)) {
-    alert("La cantidad y días de suministro deben ser números");
-    return;
-  }
-
-  // 2. Crear objeto FHIR MedicationDispense con datos esenciales
-  const medicationData = {
-    resourceType: "MedicationDispense",
-    status: "completed",
-    medicationCodeableConcept: {
-      text: document.getElementById("medicationName").value,
-    },
-    subject: {
-      reference: `patient/${currentpatientId}`,
-    },
-    quantity: {
-      value: quantity,
-      unit: "unidades",
-    },
-    daysSupply: {
-      value: daysSupply,
-      unit: "días",
-    },
-    dosageInstruction: [
-      {
-        text: document.getElementById("dosage").value,
+      subject: {
+        reference: `Patient/${currentPatientId}`,
       },
-    ],
-  };
-
-  try {
-    // 3. Enviar a la API (POST /patient/{id}/medications)
-    const response = await fetch(`${API_BASE_URL}/patient/${currentpatientId}/medications`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
+      quantity: {
+        value: quantity,
+        unit: "unidades",
       },
-      body: JSON.stringify(medicationData),
-    });
+      daysSupply: {
+        value: daysSupply,
+        unit: "días",
+      },
+      dosageInstruction: [
+        {
+          text: document.getElementById("dosage").value,
+        },
+      ],
+    };
 
-    const result = await response.json();
+    try {
+      const response = await fetch(`${API_BASE_URL}/patient/${currentPatientId}/medications`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(medicationData),
+      });
 
-    if (!response.ok) throw new Error(result.message || "Error al guardar medicamento");
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.message || "Error al registrar medicamento");
 
-    alert("✅ Medicamento registrado correctamente");
-    document.getElementById("medicationForm").reset();
-  } catch (error) {
-    console.error("Error:", error);
-    alert(`❌ Error: ${error.message}`);
+      alert("✅ Medicamento registrado correctamente");
+      // Limpia campos de medicamento pero conserva los del paciente
+      document.getElementById("medicationName").value = "";
+      document.getElementById("dosage").value = "";
+      document.getElementById("quantity").value = "";
+      document.getElementById("daysSupply").value = "";
+    } catch (error) {
+      console.error("Error:", error);
+      alert(`❌ Error al guardar medicamento: ${error.message}`);
+    }
   }
 });
