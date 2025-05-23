@@ -7,16 +7,13 @@ const response = await fetch(`${API_BASE_URL}/patient`, {
   body: JSON.stringify(patientData)
 });
 let currentpatientId = null; // Almacena el ID del paciente registrado
-// ========== REGISTRO BÁSICO DE PACIENTE ========== //
+// ========== REGISTRO DE ID DEL PACIENTE ========== //
 document.getElementById("patientForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
   // 1. Obtener solo datos esenciales del paciente
 const patientData = {
-  name: {
-    given: document.getElementById("name").value,
-    family: document.getElementById("familyName").value
-  },
+ 
   identifier: {
     system: document.getElementById("identifierSystem").value,
     value: document.getElementById("identifierValue").value
