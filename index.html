@@ -68,73 +68,43 @@
     <div class="container">
         <h1>Dispensación de medicamentos FHIR</h1>
         <form id="patientForm">
-            <!-- Sección de Información del Paciente -->
             <div class="form-section">
                 <h2>Información del Paciente</h2>
-
+                <label for="identifierSystem">Sistema de Identificación:</label>
+                <input type="text" id="identifierSystem" required placeholder="Ej: http://hospital.org/pacientes">
                 <label for="identifierValue">Número de documento:</label>
                 <input type="text" id="identifierValue" required>
+            </div>
 
-
-            <!-- Sección de Información del Medicamento -->
-            <div class="form-section">
+            <div class="form-section" id="medicationSection" style="display:none">
                 <h2>Información del Medicamento</h2>
+                <label for="medicationName">Nombre del Medicamento:</label>
+                <input type="text" id="medicationName" required>
 
-                <label for="nameMedicine">Nombre del Medicamento:</label>
-                <input type="text" id="nameMedicine" required>
+                <label for="dosage">Dosis:</label>
+                <input type="text" id="dosage" required>
 
-                <label for="presentation">Presentación:</label>
-                <input type="text" id="presentation" required placeholder="Ej: Tabletas 500mg">
+                <label for="quantity">Cantidad:</label>
+                <input type="number" id="quantity" required>
 
-                <label for="dose">Dosis:</label>
-                <input type="text" id="dose" required placeholder="Ej: 1 tableta cada 8 horas">
-
-                <label for="amount">Cantidad:</label>
-                <input type="number" id="amount" required>
-
-                <label for="disgnosis">Diagnóstico/Motivo:</label>
-                <input type="text" id="disgnosis" required>
-                
+                <label for="daysSupply">Días de suministro:</label>
+                <input type="number" id="daysSupply" required>
             </div>
 
-            <!-- Sección de Datos de Prescripción -->
-            <div class="form-section">
-                <h2>Datos de la Prescripción Médica</h2>
-
-                <label for="recipeDate">Fecha de la Receta:</label>
-                <input type="date" id="recipeDate" required>
-
-                <label for="institution">Institución de Salud:</label>
-                <input type="text" id="institution" required>
-            </div>
-
-            <!-- Sección de Observaciones -->
-            <div class="form-section">
-                <h2>Observaciones Adicionales</h2>
-
-                <label for="observations">Observaciones:</label>
-                <textarea id="observations" rows="4"></textarea>
-            </div>
-
+            <input type="hidden" id="patientId">
             <button type="submit">Registrar Dispensación</button>
         </form>
     </div>
-
-</body>
-</html>
 
     <script>
         const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com";
         let currentPatientId = null;
 
-        // ========== REGISTRO BÁSICO DE PACIENTE ========== //
         document.getElementById("patientForm").addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            // 1. Obtener solo ID del paciente
             const patientData = {
                 resourceType: "PatientId",
-                
                 identifier: [
                     {
                         system: document.getElementById("identifierSystem").value,
@@ -144,7 +114,6 @@
             };
 
             try {
-                // 2. Enviar a la API (POST /patient)
                 const response = await fetch(`${API_BASE_URL}/medications`, {
                     method: "POST",
                     headers: {
@@ -153,8 +122,10 @@
                     body: JSON.stringify(patientData),
                 });
 
-                // 3. Guardar ID del paciente y mostrar sección de medicamentos
-                currentPatientId = data._id;
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.message || "Error en registro de paciente");
+
+                currentPatientId = data._id || "TEST_ID";
                 document.getElementById("patientId").value = currentPatientId;
                 document.getElementById("medicationSection").style.display = "block";
 
@@ -165,71 +136,9 @@
             }
         });
 
-        // ========== REGISTRO DE MEDICAMENTO ========== //
-        document.getElementById("medicationForm").addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            if (!currentPatientId) {
-                alert("⚠️ Primero registra un paciente");
-                return;
-            }
-
-            // 1. Validar campos numéricos
-            const quantity = parseInt(document.getElementById("quantity").value);
-            const daysSupply = parseInt(document.getElementById("daysSupply").value);
-
-            if (isNaN(quantity) || isNaN(daysSupply)) {
-                alert("La cantidad y días de suministro deben ser números");
-                return;
-            }
-
-            // 2. Crear objeto FHIR MedicationDispense con datos esenciales
-            const medicationData = {
-                resourceType: "MedicationDispense",
-                status: "completed",
-                medicationCodeableConcept: {
-                    text: document.getElementById("medicationName").value,
-                },
-                subject: {
-                    reference: `PatientId/${currentPatientId}`,
-                },
-                quantity: {
-                    value: quantity,
-                    unit: "unidades",
-                },
-                daysSupply: {
-                    value: daysSupply,
-                    unit: "días",
-                },
-                dosageInstruction: [
-                    {
-                        text: document.getElementById("dosage").value,
-                    },
-                ],
-            };
-
-            try {
-                // 3. Enviar a la API (POST /patient/{id}/medications)
-                const response = await fetch(`${API_BASE_URL}/medications/${currentPatientId}/medications`, {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(medicationData),
-                });
-
-                const result = await response.json();
-
-                if (!response.ok) throw new Error(result.message || "Error al guardar medicamento");
-
-                alert("✅ Medicamento registrado correctamente");
-                document.getElementById("medicationForm").reset();
-            } catch (error) {
-                console.error("Error:", error);
-                alert(`❌ Error: ${error.message}`);
-            }
+        document.getElementById("patientForm").addEventListener("submit", async (e) => {
+            
         });
-        //CONEXION AL SCRIPT
-    </script src = "app.js"> </script>
+    <script src="app.js"></script>
 </body>
 </html>
