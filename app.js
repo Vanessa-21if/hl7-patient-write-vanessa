@@ -1,98 +1,87 @@
 const API_BASE_URL = "https://hl7-fhir-ehr-vane.onrender.com";
-let currentPatientId = null; // Almacena el ID del paciente registrado
 
-document.getElementById("patientForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
+document.getElementById("patientForm").addEventListener("submit", async (e) => {e.preventDefault();
 
-  if (!currentPatientId) {
-    // REGISTRO DEL PACIENTE
-    const patientData = {
+  const identifierValue = document.getElementById("identifierValue").value;
+  const nameMedicine = document.getElementById("nameMedicine").value;
+  const presentation = document.getElementById("presentation").value;
+  const dose = document.getElementById("dose").value;
+  const amount = parseInt(document.getElementById("amount").value);
+  const disgnosis = document.getElementById("disgnosis").value;
+  const recipeDate = document.getElementById("recipeDate").value;
+  const institution = document.getElementById("institution").value;
+  const observations = document.getElementById("observations").value;
+
+  if (isNaN(amount)) {
+    alert("⚠️ La cantidad debe ser un número válido.");
+    return;
+  }
+
+  // 1. Crear objeto completo con datos FHIR
+  const dataToSend = {
+    patient: {
       resourceType: "Patient",
       identifier: [
         {
-          system: document.getElementById("identifierSystem").value,
-          value: document.getElementById("identifierValue").value,
+          value: identifierValue,
         },
       ],
-    };
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/patient`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(patientData),
-      });
-
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.message || "Error al registrar paciente");
-
-      currentPatientId = data._id;
-      document.getElementById("patientId").value = currentPatientId;
-      document.getElementById("medicationSection").style.display = "block";
-
-      alert(`✅ Paciente registrado (ID: ${currentPatientId})`);
-    } catch (error) {
-      console.error("Error:", error);
-      alert(`❌ Error al registrar paciente: ${error.message}`);
-      return;
-    }
-  } else {
-    // REGISTRO DEL MEDICAMENTO
-    const quantity = parseInt(document.getElementById("quantity").value);
-    const daysSupply = parseInt(document.getElementById("daysSupply").value);
-
-    if (isNaN(quantity) || isNaN(daysSupply)) {
-      alert("⚠️ La cantidad y días de suministro deben ser números");
-      return;
-    }
-
-    const medicationData = {
+    },
+    medicationDispense: {
       resourceType: "MedicationDispense",
       status: "completed",
       medicationCodeableConcept: {
-        text: document.getElementById("medicationName").value,
-      },
-      subject: {
-        reference: `Patient/${currentPatientId}`,
+        text: nameMedicine,
       },
       quantity: {
-        value: quantity,
+        value: amount,
         unit: "unidades",
-      },
-      daysSupply: {
-        value: daysSupply,
-        unit: "días",
       },
       dosageInstruction: [
         {
-          text: document.getElementById("dosage").value,
+          text: dose,
         },
       ],
-    };
-
-    try {
-      const response = await fetch(`${API_BASE_URL}/patient/${currentPatientId}/medications`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      daysSupply: {
+        value: 1,
+        unit: "día(s)",
+      },
+      extension: [
+        {
+          url: "http://example.org/fhir/StructureDefinition/presentation",
+          valueString: presentation,
         },
-        body: JSON.stringify(medicationData),
-      });
+        {
+          url: "http://example.org/fhir/StructureDefinition/disgnosis",
+          valueString: disgnosis,
+        },
+        {
+          url: "http://example.org/fhir/StructureDefinition/recipeDate",
+          valueString: recipeDate,
+        },
+        {
+          url: "http://example.org/fhir/StructureDefinition/institution",
+          valueString: institution,
+        },
+        {
+          url: "http://example.org/fhir/StructureDefinition/observations",
+          valueString: observations,
+        },
+      ],
+    },
+  };
 
-      const result = await response.json();
-      if (!response.ok) throw new Error(result.message || "Error al registrar medicamento");
+  try {
+    const response = await fetch(`${API_BASE_URL}/medications`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dataToSend),
+    });
 
-      alert("✅ Medicamento registrado correctamente");
-      // Limpia campos de medicamento pero conserva los del paciente
-      document.getElementById("medicationName").value = "";
-      document.getElementById("dosage").value = "";
-      document.getElementById("quantity").value = "";
-      document.getElementById("daysSupply").value = "";
-    } catch (error) {
-      console.error("Error:", error);
-      alert(`❌ Error al guardar medicamento: ${error.message}`);
-    }
-  }
-});
+    const result = await response.json();
+
+    if (!response.ok) throw new Error(result.message || "Error al registrar la dispensación");
+
+    alert("✅ Dispensación registrada correctamente."
