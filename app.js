@@ -20,8 +20,7 @@ const patientData = {
   identifier: {
     system: document.getElementById("identifierSystem").value,
     value: document.getElementById("identifierValue").value
-  }
-};
+  },
   try {
     // 2. Enviar a la API (POST /patient)
     const response = await fetch(`${API_BASE_URL}/patient`, {
