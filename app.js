@@ -8,7 +8,7 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
   const presentation = document.getElementById("presentation").value;
   const dose = document.getElementById("dose").value;
   const amount = parseInt(document.getElementById("amount").value);
-  const disgnosis = document.getElementById("disgnosis").value;
+  const diagnosis = document.getElementById("disgnosis").value;
   const recipeDate = document.getElementById("recipeDate").value;
   const institution = document.getElementById("institution").value;
   const observations = document.getElementById("observations").value;
@@ -18,59 +18,23 @@ document.getElementById("patientForm").addEventListener("submit", async (e) => {
     return;
   }
 
-  // 1. Crear objeto completo con datos FHIR
+  // ESTRUCTURA JSON
   const dataToSend = {
-    patient: {
-      resourceType: "Patient",
-      identifier: [
-        {
-          value: identifierValue,
-        },
-      ],
-    },
-    medicationDispense: {
-      resourceType: "MedicationDispense",
-      status: "completed",
-      medicationCodeableConcept: {
-        text: nameMedicine,
-      },
-      quantity: {
-        value: amount,
-        unit: "unidades",
-      },
-      dosageInstruction: [
-        {
-          text: dose,
-        },
-      ],
-      daysSupply: {
-        value: 1,
-        unit: "día(s)",
-      },
-      extension: [
-        {
-          url: "http://example.org/fhir/StructureDefinition/presentation",
-          valueString: presentation,
-        },
-        {
-          url: "http://example.org/fhir/StructureDefinition/disgnosis",
-          valueString: disgnosis,
-        },
-        {
-          url: "http://example.org/fhir/StructureDefinition/recipeDate",
-          valueString: recipeDate,
-        },
-        {
-          url: "http://example.org/fhir/StructureDefinition/institution",
-          valueString: institution,
-        },
-        {
-          url: "http://example.org/fhir/StructureDefinition/observations",
-          valueString: observations,
-        },
-      ],
-    },
-  };
+  patient: {
+    document: identifierValue,
+  },
+  medication: {
+    nameMedicine: nameMedicine,
+    presentation: presentation,
+    dose: dose,
+    amount: amount,
+    diagnosis: disgnosis,  // ✅ corregido nombre del campo
+    recipeDate: recipeDate,
+    institution: institution,
+    observations: observations
+  }
+};
+
 
   try {
     const response = await fetch(`${API_BASE_URL}/medications`, {
